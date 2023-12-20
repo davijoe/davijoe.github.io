@@ -1,0 +1,312 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How-to-VC-and-CICD</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="hippocampus-cicd">Hippocampus CI/CD</h1>
+<p><strong><em>"Hej med jer! Og velkommen til den her del af teknikken, nemlig den del der omhandler opsætning af CI/CD som vil skal bruge til at undgå at sidde og sige “It works on my machine”.</em></strong></p>
+<p><strong><em>Det her bliver altså bare en ULTRAKORT gennemgang af den eksamensrelevante opsætning!"</em></strong></p>
+<h2 id="hippocampus-øvelse-status">Hippocampus Øvelse Status</h2>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled=""> <strong>2 repositories</strong> (Backend + Frontend)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled=""> 3 branches oprettet i hvert repo. 6 i alt.</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled=""> 1 environment til hver branch. <strong>6 i alt.</strong></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled=""> Branch protection på de <strong>main, dev, og staging</strong></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled=""> 3 web apps oprettet til backend</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled=""> 3 <strong>static</strong> web apps oprettet til frontend</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled=""> 1 Linux VM til at køre MySQL vha. <strong>Docker</strong></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" checked="true" disabled=""> Pladsholder 1</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" checked="true" disabled=""> Pladsholder 2</li>
+</ul>
+<h2 id="git-stuff">Git stuff</h2>
+<h3 id="opret-mapper-og-init-repositories">1. Opret mapper og init repositories</h3>
+<p><strong>1.1 Lav en projekt-mappe<br>
+Fra command line, brug; “md” eller “mkdir”</strong> (cd ind i roden med det samme)<br>
+md hippocampus &amp;&amp; cd hippocampus<br>
+<strong>1.2 opret frontend og backend mapper og skriv dem ud i konsollen</strong><br>
+md frontend &amp;&amp; md backend &amp;&amp; ls<br>
+<strong>1.3 initialiser git og lav repositories på GitHub</strong><br>
+skriv “gh” i dit favorit command line tool. (naturligvis Git Bash…)<br>
+Hvis du ikke har GitHub CLI installeret, kan du bare lave repoerne via <a href="https://github.com/">https://github.com/</a></p>
+<p><strong>Backend:</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">cd</span> backend <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> init
+gh repo create hippocampus-backend --public
+<span class="token keyword">echo</span> <span class="token string">'Hippocampus Backend'</span> <span class="token operator">&gt;&gt;</span> README.md <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> add README.md
+<span class="token function">git</span> commit -m <span class="token string">"The beginning of the end"</span>
+<span class="token function">git</span> branch -M main
+<span class="token function">git</span> remote add origin https://github.com/davijoe/hippocampus-backend.git
+<span class="token function">git</span> push -u origin main
+</code></pre>
+<p><strong>Frontend:</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">cd</span> <span class="token punctuation">..</span>/frontend <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> init
+gh repo create hippocampus-frontend --public
+<span class="token keyword">echo</span> <span class="token string">'Hippocampus Frontend'</span> <span class="token operator">&gt;&gt;</span> README.md <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> add README.md
+<span class="token function">git</span> commit -m <span class="token string">"The beginning of the end"</span>
+<span class="token function">git</span> branch -M main
+<span class="token function">git</span> remote add origin https://github.com/davijoe/hippocampus-frontend.git
+<span class="token function">git</span> push -u origin main
+</code></pre>
+<h3 id="opret-3-branches-til-hver">2. Opret 3 branches til hver</h3>
+<p>Evt. “dev”, “staging”, og “main” (som vi lige oprettede).</p>
+<p><strong>Frontend</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">git</span> checkout -b staging <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> push -u origin staging
+<span class="token function">git</span> checkout -b dev <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> push -u origin dev
+</code></pre>
+<p><strong>Backend</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">cd</span> <span class="token punctuation">..</span>/backend <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> checkout -b staging <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> push -u origin staging
+<span class="token function">git</span> checkout -b dev <span class="token operator">&amp;&amp;</span> <span class="token function">git</span> push -u origin dev
+</code></pre>
+<h3 id="opret-repo-environments">3. Opret Repo Environments</h3>
+<p><strong>Backend</strong><br>
+<a href="https://github.com/davijoe/hippocampus-backend/settings/environments">https://github.com/davijoe/hippocampus-backend/settings/environments</a><br>
+3.1 Klik “New environment” --&gt; Navngiv den “Production” --&gt; Klik “Configure environment”<br>
+3.2 Ret “No restriction” til “Selected branches and tags” --&gt; Klik “Add deployment branch or tag rule”<br>
+3.3 Skriv “main” i “Name pattern” og klik “Add rule”<br>
+3.4 Klik “Save protection rules” for at gemme</p>
+<p>3.5 Opret “Development” og “Staging/QA” næsten ligesådan<br>
+… eller hvad du har lyst til at kalde dem.</p>
+<p>3.5.1 <strong>Staging:</strong><br>
+Create environment --&gt; navngiv miljø. “Staging / QA” --&gt; Configure --&gt; Ret “No restriction” til “Protected branches only” --&gt; Save protection rules<br>
+3.5.2 <strong>Development:</strong><br>
+Create environment --&gt; navngiv miljø. “Development” --&gt; Configure --&gt; Save protection rules</p>
+<p><strong>Frontend</strong></p>
+<p>Gentag 3.1 --&gt; 3.5.2.</p>
+<h3 id="branch-protection-rules">4. Branch Protection Rules</h3>
+<p>WIP</p>
+<h2 id="azure-stuff">Azure stuff</h2>
+<h3 id="opret-3-web-apps-til-backenden">4. Opret 3 Web Apps til backenden</h3>
+<p><strong>Links til at begge slags:</strong><br>
+<a href="https://portal.azure.com/#create/Microsoft.WebSite">Create Web App</a><br>
+<a href="https://portal.azure.com/#create/Microsoft.StaticApp">Create Static Web App</a></p>
+<p><strong>4.1 (dynamisk?) Web App</strong><br>
+<strong>4.1.1 Settings:</strong><br>
+Subscription: <strong>Azure for Students</strong><br>
+Resource Group: Vælg selv. Jeg lavede en ny og kaldte den “<strong>ExamResources</strong>”<br>
+Name: Whatever. Jeg har valgt: “<strong>dev-hippocampus</strong>”, “<strong>staging-hippocampus</strong>”, “<strong>live-hippocampus</strong>”<br>
+Publish: <strong>Code</strong><br>
+Runtime stack: <strong>Java 17</strong><br>
+Java web server stack: <strong>Java SE (Embedded Web Server)</strong><br>
+OS: <strong>Linux</strong><br>
+Region: <strong>West Europe</strong><br>
+<s>Linux Plan: Who cares</s><br>
+Pricing Plan: <strong>Free F1</strong></p>
+<p>Klik “<strong>Review + Create</strong>” --&gt; “<strong>Create</strong>”</p>
+<p><strong>4.1.2: Connect Development Web App til GitHub Repo</strong><br>
+Tilgå din nye Web App på Azure.</p>
+<p><strong>10 ultrakorte trin:</strong></p>
+<ol>
+<li>Deployment --&gt; Deployment Center</li>
+<li>Source : GitHub</li>
+<li>Organization : “DIT GITHUB USERNAME”</li>
+<li>Repository : hippocampus-backend</li>
+<li>Branch : dev</li>
+<li>Authentication type : Basic authentication</li>
+<li>Klik “Save”</li>
+<li>Gå til “Configuration” under “Settings” i venstre fane</li>
+<li>Indsæt “New application string” for dine miljøvariabler. JDBC_* og TOKEN_SECRET</li>
+<li>Udtryk din formentlig ustyrlige glæde ved at skulle gentage ovenstående for staging og main/live/prod/whatever</li>
+</ol>
+<p><strong>4.2  Static Web App</strong><br>
+<a href="https://portal.azure.com/#create/Microsoft.StaticApp">Create Static Web App</a></p>
+<p>Subscription: <strong>Azure for Students</strong><br>
+Resource Group: Vælg selv. Jeg lavede en ny og kaldte den “<strong>ExamResources</strong>”<br>
+Name: Whatever. Jeg har valgt: “<strong>dev-hippocampus-frontend</strong>”, “<strong>staging-hippocampus-frontend</strong>”, “<strong>live-hippocampus-frontend</strong>”<br>
+Plan type : <strong>Free</strong><br>
+Region: <strong>West Europe</strong><br>
+Source : <strong>GitHub</strong><br>
+Organization :  <strong>davijoe</strong> (dit eget username)<br>
+Repository : <strong>hippocampus-frontend</strong><br>
+Branch : <strong>main</strong></p>
+<p>Klik “<strong>Review + Create</strong>” --&gt; “<strong>Create</strong>”</p>
+<p>Mere spænding venter dig --&gt; <a href="https://portal.azure.com/#create/Microsoft.StaticApp">Jaa, én gang til</a></p>
+<h3 id="docker-on-azure-linux-vm">5. Docker on Azure Linux VM</h3>
+<p><strong>Step 1 - Opret VM’en på Azure</strong><br>
+<a href="https://portal.azure.com/#create/microsoft.freeaccountvirtualmachine-linux">Create a virtual machine - Microsoft Azure</a><br>
+OBS: Hvis den fejler og siger “This resource group contains existing resources. …”, så bare lav en ny.</p>
+<ol>
+<li>Resource group : <strong>ExamResourceGroup</strong></li>
+<li>VM Name : <strong>Amygdala</strong></li>
+<li>Region: <strong>West Europe</strong></li>
+<li>Image : <strong>Ubuntu 22.04 LTS</strong></li>
+<li>Size : <strong>Standard B1s</strong></li>
+<li>Authentication type : <strong>SSH public key</strong></li>
+<li>Username : <strong>BrugerNummerEt</strong></li>
+<li>SSH public key source : <strong>Generate new key pair</strong></li>
+<li>Key pair name : <strong>temporal_lobe</strong></li>
+<li>Public inbound ports : <strong>SSH (22)</strong><br>
+Klik “<strong>Review + Create</strong>” --&gt; “<strong>Create</strong>” --&gt; “<strong>Download private key and create resource</strong>”!</li>
+</ol>
+<p><strong>Step 2 - Updater OS og opret Swapfil</strong></p>
+<p><strong>1) Connect via SSH.</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">ssh</span> -i temporal_lobe.pem BrugerNummerEt@40.68.44.175
+</code></pre>
+<p><strong>1.1) BONUS opgave --&gt; Opret aliasser (egne kommandoer / shortcuts)</strong><br>
+<strong>OBS</strong>: Se Alias-oversigten i slutningen af dette dokument for inspiration<br>
+<strong>Bash:</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> ~/.bash_aliases
+</code></pre>
+<p><strong>Syntax</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">alias</span> <span class="token variable">$ALIAS</span><span class="token operator">=</span><span class="token string">'command line argument'</span>
+</code></pre>
+<p><strong>eksempelvis</strong><br>
+alias update=‘sudo apt-get update’</p>
+<p><strong>Panik-fasen</strong><br>
+Du forlader nano editor ved at trykke <strong>Ctrl+X</strong> --&gt; <strong>Y</strong> --&gt; <strong>Enter</strong></p>
+<p>Før ændringerne træder i kraft skal man logge af og på igen ELLER bruge ‘<strong>source</strong>’</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">source</span> ~/.bash_aliases
+</code></pre>
+<p><strong>2) Updater OS</strong><br>
+Bash (Hvis du lavede 1.1):<br>
+<em>update</em><br>
+<em>upgrade</em></p>
+<p>Bash (Hvis du IKKE lavede 1.1):<br>
+<em>sudo apt-get update</em><br>
+<em>sudo apt-get upgrade</em></p>
+<p>Bekræft med Y, hvis du bliver prompted dig for en accept</p>
+<p><strong>Hvis den spørger hvilke services du vil genstarte:</strong><br>
+No idea. Jeg gætter bare. Du skal bare reboote hvis du vælger forkert.<br>
+<strong>Bash:</strong><br>
+sudo reboot<br>
+(bare ‘reboot’ hvis du har aliasser. Hvilket du bør. Ellers er du ikke sej)</p>
+<p><strong>3) Opret Swapfile</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> if<span class="token operator">=</span>/dev/zero of<span class="token operator">=</span>/swapfile bs<span class="token operator">=</span>1024 count<span class="token operator">=</span>1048576
+<span class="token function">sudo</span> mkswap /swapfile
+<span class="token function">sudo</span> <span class="token function">chmod</span> 0600 /swapfile
+<span class="token comment">#  Måske mkswap /swapfile igen efter chmod</span>
+<span class="token function">sudo</span> swapon /swapfile
+<span class="token keyword">echo</span> <span class="token string">'/swapfile none swap sw 0 0'</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> -a /etc/fstab
+</code></pre>
+<p><strong>4) Installer Docker</strong></p>
+<p>1: Remove / Uninstall potential conflicts:</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token keyword">for</span> pkg <span class="token keyword">in</span> docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc<span class="token punctuation">;</span> <span class="token keyword">do</span> <span class="token function">sudo</span> <span class="token function">apt-get</span> remove <span class="token variable">$pkg</span><span class="token punctuation">;</span> <span class="token keyword">done</span>
+</code></pre>
+<p>Installation med apt. Først skal vi sætte Dockers eget repository op (har ikke noget med git at gøre), og så installere vi Docker i det repository.</p>
+<p>2: Add Docker’s official GPG key:</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> update
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> ca-certificates curl gnupg
+<span class="token function">sudo</span> <span class="token function">install</span> -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg <span class="token operator">|</span> <span class="token function">sudo</span> gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+<span class="token function">sudo</span> <span class="token function">chmod</span> a+r /etc/apt/keyrings/docker.gpg
+</code></pre>
+<p>3: Tilføj Docker repo til apt sources:</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token keyword">echo</span> \
+  <span class="token string">"deb [arch=<span class="token variable"><span class="token variable">$(</span>dpkg --print-architecture<span class="token variable">)</span></span> signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release &amp;&amp; echo "</span><span class="token variable">$VERSION_CODENAME</span><span class="token string">") stable"</span> <span class="token operator">|</span> \
+  <span class="token function">sudo</span> <span class="token function">tee</span> /etc/apt/sources.list.d/docker.list <span class="token operator">&gt;</span> /dev/null
+</code></pre>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> update
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+</code></pre>
+<p>Test om det virker ved at køre docker containeren “Hello World”.<br>
+Den henter image med først og kører det med samme.</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> docker run hello-world
+</code></pre>
+<p><strong>4) Hent et mysql image og opret database</strong></p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> docker pull mysql:8.0.34
+</code></pre>
+<p>Erstat SAFE_PW og cars-mysql med det der er relevant for dit projekt</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> docker run --name cars-mysql --restart unless-stopped -p 3306:3306 -e MYSQL_ROOT_PASSWORD<span class="token operator">=</span>SAFE_PW -d mysql:8.0.34
+</code></pre>
+<p>Åben MySQL</p>
+<pre class=" language-sql"><code class="prism  language-sql">mysql <span class="token operator">-</span>u root <span class="token operator">-</span>p
+</code></pre>
+<p>Lav non-root user med grants</p>
+<pre class=" language-sql"><code class="prism  language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">USER</span> <span class="token string">'a_user'</span>@'<span class="token operator">%</span><span class="token string">' IDENTIFIED BY '</span>password<span class="token string">';
+GRANT ALL ON *.* TO '</span>a_user<span class="token string">'@'</span><span class="token operator">%</span>'<span class="token punctuation">;</span>
+</code></pre>
+<p>Verificer at den blev oprettet</p>
+<pre class=" language-sql"><code class="prism  language-sql"><span class="token keyword">SELECT</span> <span class="token keyword">User</span><span class="token punctuation">,</span> Host <span class="token keyword">FROM</span> mysql<span class="token punctuation">.</span><span class="token keyword">user</span><span class="token punctuation">;</span>
+<span class="token keyword">SHOW</span>  grants <span class="token keyword">FOR</span>  <span class="token string">'a_user'</span><span class="token variable">@'%'</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Opret database / schema</p>
+<pre class=" language-sql"><code class="prism  language-sql"><span class="token keyword">create</span> <span class="token keyword">database</span> MY_DB<span class="token punctuation">;</span>
+<span class="token keyword">show</span> <span class="token keyword">databases</span><span class="token punctuation">;</span>
+</code></pre>
+<h1 id="aliases-list">ALIASES LIST</h1>
+<h3 id="navigation-and-directories">NAVIGATION and DIRECTORIES</h3>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">alias</span> home<span class="token operator">=</span><span class="token string">'cd ~/'</span>  
+<span class="token function">alias</span> cd<span class="token punctuation">..</span><span class="token operator">=</span><span class="token string">'cd ..'</span>  
+<span class="token function">alias</span> back<span class="token operator">=</span><span class="token string">'cd ..'</span>  
+<span class="token function">alias</span> <span class="token punctuation">..</span><span class="token operator">=</span><span class="token string">'cd ..'</span>  
+<span class="token function">alias</span> <span class="token punctuation">..</span>.<span class="token operator">=</span><span class="token string">'cd ../../'</span>  
+<span class="token function">alias</span> <span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token operator">=</span><span class="token string">'cd ../../../'</span>  
+<span class="token function">alias</span> <span class="token punctuation">..</span><span class="token punctuation">..</span>.<span class="token operator">=</span><span class="token string">'cd ../../../../'</span>  
+<span class="token function">alias</span> .1<span class="token operator">=</span><span class="token string">'cd ..'</span>  
+<span class="token function">alias</span> .2<span class="token operator">=</span><span class="token string">'cd ../../'</span>  
+<span class="token function">alias</span> .3<span class="token operator">=</span><span class="token string">'cd ../../../'</span>  
+<span class="token function">alias</span> .4<span class="token operator">=</span><span class="token string">'cd ../../../../'</span>
+<span class="token function">alias</span> apt-get<span class="token operator">=</span><span class="token string">'sudo apt-get'</span>
+<span class="token function">alias</span> myalias<span class="token operator">=</span><span class="token string">'sudo nano ~/.bash_aliases'</span>
+<span class="token function">alias</span> aliases<span class="token operator">=</span><span class="token string">'sudo nano ~/.bash_aliases'</span>
+<span class="token function">alias</span> sovs<span class="token operator">=</span><span class="token string">'source ~/.bash_aliases'</span>
+<span class="token function">alias</span> home<span class="token operator">=</span><span class="token string">'cd ~/'</span>
+<span class="token function">alias</span> la<span class="token operator">=</span><span class="token string">'ls -lah'</span>
+<span class="token function">alias</span> mkd<span class="token operator">=</span><span class="token string">'mkdir -p'</span>
+<span class="token function">alias</span> logs<span class="token operator">=</span><span class="token string">'cd /var/log'</span>
+
+<span class="token comment">### CLI FLEXIBILITY</span>
+<span class="token function">alias</span> c<span class="token operator">=</span><span class="token string">'clear'</span>
+<span class="token function">alias</span> cls<span class="token operator">=</span><span class="token string">'clear'</span>
+
+<span class="token comment">### SAFETY FIRST</span>
+<span class="token function">alias</span> mv<span class="token operator">=</span><span class="token string">'mv -i'</span>  
+<span class="token function">alias</span> cp<span class="token operator">=</span><span class="token string">'cp -i'</span>  
+<span class="token function">alias</span> ln<span class="token operator">=</span><span class="token string">'ln -i'</span>
+<span class="token function">alias</span> rm<span class="token operator">=</span><span class="token string">'rm -I --preserve-root'</span>
+
+<span class="token comment">### IAM and SYSTEM</span>
+<span class="token function">alias</span> _<span class="token operator">=</span><span class="token string">'sudo'</span>
+<span class="token function">alias</span> nano<span class="token operator">=</span><span class="token string">'sudo nano'</span>
+<span class="token function">alias</span> suboot<span class="token operator">=</span><span class="token string">'sudo reboot'</span>
+<span class="token function">alias</span> update<span class="token operator">=</span><span class="token string">'sudo apt-get update'</span>
+<span class="token function">alias</span> upgrade<span class="token operator">=</span><span class="token string">'sudo apt-get upgrade'</span>
+<span class="token function">alias</span> mem<span class="token operator">=</span><span class="token string">'free -m'</span>
+<span class="token function">alias</span> rbash<span class="token operator">=</span><span class="token string">'source ~/.bashrc'</span>
+<span class="token function">alias</span> lsof<span class="token operator">=</span><span class="token string">'lsof -i'</span>
+<span class="token function">alias</span> root<span class="token operator">=</span><span class="token string">'sudo -i'</span>  
+<span class="token function">alias</span> su<span class="token operator">=</span><span class="token string">'sudo -i'</span>
+
+<span class="token comment">### TIME</span>
+<span class="token function">alias</span> d<span class="token operator">=</span><span class="token string">'date +%F'</span>  
+<span class="token function">alias</span> now<span class="token operator">=</span><span class="token string">'date +"%T"'</span>  
+<span class="token function">alias</span> nowtime<span class="token operator">=</span>now  
+<span class="token function">alias</span> nowdate<span class="token operator">=</span><span class="token string">'date +"%m-%d-%Y"'</span>
+
+<span class="token comment">### NETWORKING</span>
+<span class="token function">alias</span> ports<span class="token operator">=</span><span class="token string">'netstat -tulanp'</span>
+<span class="token function">alias</span> myip<span class="token operator">=</span><span class="token string">'curl http://ipecho.net/plain; echo'</span>
+<span class="token function">alias</span> netrestart<span class="token operator">=</span><span class="token string">'sudo systemctl restart NetworkManager'</span>
+
+<span class="token comment">### DOCKER</span>
+<span class="token function">alias</span> dp<span class="token operator">=</span><span class="token string">'sudo docker pull'</span>
+<span class="token function">alias</span> dps<span class="token operator">=</span><span class="token string">'sudo docker ps'</span>
+<span class="token function">alias</span> dpsa<span class="token operator">=</span><span class="token string">'sudo docker ps --all'</span>
+<span class="token function">alias</span> dlog<span class="token operator">=</span><span class="token string">'sudp docker logs'</span>
+<span class="token function">alias</span> drmc<span class="token operator">=</span><span class="token string">'sudo docker rm'</span>
+<span class="token function">alias</span> drmi<span class="token operator">=</span><span class="token string">'sudo docker rmi'</span>
+<span class="token function">alias</span> dprune<span class="token operator">=</span><span class="token string">'sudo docker system prune'</span>
+<span class="token function">alias</span> dcu<span class="token operator">=</span><span class="token string">'docker-compose up --build -d'</span>
+<span class="token function">alias</span> dcs<span class="token operator">=</span><span class="token string">'docker compose stop'</span>
+<span class="token function">alias</span> dimg<span class="token operator">=</span><span class="token string">'docker images'</span>
+
+<span class="token comment">### GIT GUD</span>
+<span class="token function">alias</span> gs<span class="token operator">=</span><span class="token string">'git status'</span>
+<span class="token function">alias</span> gss<span class="token operator">=</span><span class="token string">'git status -s'</span>
+<span class="token function">alias</span> ga<span class="token operator">=</span><span class="token string">'git add'</span>
+<span class="token function">alias</span> ga<span class="token operator">=</span><span class="token string">'git add .'</span>  
+<span class="token function">alias</span> gc<span class="token operator">=</span><span class="token string">'git commit -m'</span>
+<span class="token function">alias</span> glog<span class="token operator">=</span><span class="token string">'git log --oneline'</span>  
+<span class="token function">alias</span> gd<span class="token operator">=</span><span class="token string">'git diff'</span>
+<span class="token function">alias</span> gaa<span class="token operator">=</span><span class="token string">'git add -A'</span>
+
+</code></pre>
+</div>
+</body>
+
+</html>
