@@ -1,11 +1,13 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How-to-CICD</title>
+  <title>How-to-VC-and-CICD</title>
   <link rel="stylesheet" href="https://stackedit.io/style.css" />
 </head>
+
 <body class="stackedit">
   <div class="stackedit__html"><h1 id="hippocampus-cicd">Hippocampus CI/CD</h1>
 <p><strong><em>"Hej med jer! Og velkommen til den her del af teknikken, nemlig den del der omhandler opsætning af CI/CD som vil skal bruge til at undgå at sidde og sige “It works on my machine”.</em></strong></p>
